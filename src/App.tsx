@@ -1,12 +1,9 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-// @ts-ignore
-import Card from "@heruka_urgyen/react-playing-cards/lib/TcN"
+import { PlayingCard } from './components/PlayingCard';
 
 function App() {
-
-  const deckType = 'basic'
 
   const suits = ["h", "d", "c", "s"];
   const ranks = ["9", "T", "J", "Q", "K", "A"];
@@ -15,7 +12,7 @@ function App() {
   let deck: React.JSX.Element[] = [];
   for(const suit of suits) {
     for(const rank of ranks) {
-      deck.push(<Card key={rank+suit} card={rank+suit} deckType={deckType} height="200px" />)
+      deck.push(<PlayingCard key={rank+suit} suit={suit} rank={rank} height="150px"/>)
     }
   }
 
