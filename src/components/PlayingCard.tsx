@@ -1,21 +1,25 @@
-import { useState } from "react";
+import { MouseEventHandler } from "react";
 // @ts-ignore
-import Card from "@heruka_urgyen/react-playing-cards/lib/TcN"
+import Card from "@heruka_urgyen/react-playing-cards/lib/TcN";
 
-const deckType = 'basic'
+const deckType = "basic";
 
 interface PlayingCardProps {
-    rank: string;
-    suit: string;
-    height: string;
+  rank: string;
+  suit: string;
+  height: string;
+  handleClick?: MouseEventHandler<HTMLDivElement>;
 }
 
 export const PlayingCard = (props: PlayingCardProps) => {
-    const [isFaceUp, setCardDirection] = useState(true);
-
-    const toggleCardDirection = (e: any) => {
-        setCardDirection(!isFaceUp);
-    }
-
-    return <div onClick={toggleCardDirection}><Card key={props.rank+props.suit} card={props.rank+props.suit} deckType={deckType} height={props.height} back={!isFaceUp}/></div>;
+  return (
+    <div data-key={props.rank + props.suit} onClick={props.handleClick}>
+      <Card
+        key={props.rank + props.suit}
+        card={props.rank + props.suit}
+        deckType={deckType}
+        height={props.height}
+      />
+    </div>
+  );
 };
