@@ -11,7 +11,7 @@ interface PlayingCardProps {
   handleClick?: MouseEventHandler<HTMLDivElement>;
 }
 
-export const PlayingCard = (props: PlayingCardProps) => {
+const PlayingCard = (props: PlayingCardProps) => {
   return (
     <div data-key={props.rank + props.suit} onClick={props.handleClick}>
       <Card
@@ -23,3 +23,5 @@ export const PlayingCard = (props: PlayingCardProps) => {
     </div>
   );
 };
+
+export default PlayingCard;
