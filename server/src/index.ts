@@ -15,6 +15,18 @@ const io = new Server(server, {
   },
 });
 
+io.on("connection", (socket) => {
+  console.log(`User connected: ${socket.id}`);
+
+  socket.on("send_message", (data) => {
+    socket.to(data.room).emit("receive_message", data);
+  });
+
+  socket.on("join_room", (data) => {
+    socket.join(data.roomCode);
+  });
+});
+
 server.listen(3001, () => {
   console.log("hello from the server");
 });
