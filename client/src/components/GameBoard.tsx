@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PlayingCard from "./PlayingCard";
 
-interface CardProperties {
+interface Card {
   key: string;
   rank: string;
   suit: string;
@@ -19,7 +19,7 @@ const GameBoard = () => {
 
   // create deck of card components for the game
   // TODO: we need to shuffle the deck
-  let initialDeck: CardProperties[] = [];
+  let initialDeck: Card[] = [];
   for (const rank of ranks) {
     for (const suit of suits) {
       initialDeck.push({
@@ -31,15 +31,15 @@ const GameBoard = () => {
     }
   }
 
-  const [playerOneHand, setPlayerOneHand] = useState<CardProperties[]>(
+  const [playerOneHand, setPlayerOneHand] = useState<Card[]>(
     initialDeck.slice(0, 6)
   );
-  const [playerTwoHand, setPlayerTwoHand] = useState<CardProperties[]>(
+  const [playerTwoHand, setPlayerTwoHand] = useState<Card[]>(
     initialDeck.slice(6, 12)
   );
-  const [trumpCard, setTrumpCard] = useState<CardProperties>(initialDeck[12]);
-  const [cardsInPlay, setCardsInPlay] = useState<CardProperties[]>([]);
-  const [deck, setDeck] = useState<CardProperties[]>(
+  const [trumpCard, setTrumpCard] = useState<Card>(initialDeck[12]);
+  const [cardsInPlay, setCardsInPlay] = useState<Card[]>([]);
+  const [deck, setDeck] = useState<Card[]>(
     initialDeck.slice(13, initialDeck.length)
   );
 

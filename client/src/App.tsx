@@ -2,28 +2,41 @@ import "./App.css";
 import { io } from "socket.io-client";
 import GameBoard from "./components/GameBoard";
 import { useEffect, useState } from "react";
+import { JoinRoomResponse } from "./types/joinRoom";
+import { GameDataResponse } from "./types/gameData";
 
 const socket = io("http://localhost:3001");
 
 const App = () => {
   const [message, setMessage] = useState("");
-  const [room, setRoom] = useState("");
+  const [roomCode, setRoomCode] = useState("");
 
   const [receivedMessage, setReceivedMessage] = useState("");
 
   const sendMesssage = () => {
-    socket.emit("send_message", { message: message, room: room });
+    socket.emit("send_message", { message: message, roomCode: roomCode });
   };
 
   const joinRoom = () => {
-    if (room) {
-      socket.emit("join_room", { roomCode: room });
+    if (roomCode) {
+      socket.emit(
+        "join_room",
+        { roomCode: roomCode },
+        (response: JoinRoomResponse) => {
+          console.log("Join room response: ", response);
+        }
+      );
     }
   };
 
+  // receive messages emitted by socket.io
   useEffect(() => {
     socket.on("receive_message", (data) => {
       setReceivedMessage(data.message);
+    });
+
+    socket.on("new_game", (data: GameDataResponse) => {
+      console.log("New game starting: ", data);
     });
   }, []);
 
@@ -32,7 +45,7 @@ const App = () => {
       <input
         placeholder="Room Number..."
         onChange={(event) => {
-          setRoom(event.target.value);
+          setRoomCode(event.target.value);
         }}
       ></input>
       <button onClick={joinRoom}>Join Room</button>
