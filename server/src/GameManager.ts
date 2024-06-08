@@ -1,7 +1,7 @@
-import { Card, GameDataResponse } from "@client/types/gameData";
+import { Card, GameData } from "@client/types/gameData";
 
 export namespace GameManager {
-  export function createNewGame(): GameDataResponse {
+  export function createNewGame(): GameData {
     const ranks = ["9", "T", "J", "Q", "K", "A"];
     const suits = ["h", "d", "c", "s"];
 
@@ -20,8 +20,8 @@ export namespace GameManager {
     }
 
     return {
-      playerOneHand: initialDeck.slice(0, 6),
-      playerTwoHand: initialDeck.slice(6, 12),
+      currentPlayerHand: initialDeck.slice(0, 6),
+      opponentPlayerHand: initialDeck.slice(6, 12),
       trumpCard: initialDeck[12],
       cardsInPlay: [],
       deck: initialDeck.slice(13, initialDeck.length),

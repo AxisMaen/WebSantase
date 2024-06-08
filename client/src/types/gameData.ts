@@ -5,9 +5,9 @@ export interface Card {
   height: string;
 }
 
-export interface GameDataResponse {
-  playerOneHand: Card[];
-  playerTwoHand: Card[];
+export interface GameData {
+  currentPlayerHand: Card[];
+  opponentPlayerHand: Card[];
   trumpCard: Card;
   cardsInPlay: Card[];
   deck: Card[];
