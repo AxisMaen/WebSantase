@@ -8,6 +8,7 @@ interface PlayingCardProps {
   rank: string;
   suit: string;
   height: string;
+  isFaceUp: boolean;
   handleClick?: MouseEventHandler<HTMLDivElement>;
 }
 
@@ -19,6 +20,7 @@ const PlayingCard = (props: PlayingCardProps) => {
         card={props.rank + props.suit}
         deckType={deckType}
         height={props.height}
+        back={!props.isFaceUp}
       />
     </div>
   );

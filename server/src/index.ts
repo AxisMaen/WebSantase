@@ -33,7 +33,7 @@ io.on("connection", (socket) => {
 
     const users = io.sockets.adapter.rooms.get(data.roomCode);
 
-    // only join the room if its has less than 2 players
+    // only join the room if it has less than 2 players
     if (users) {
       if (users.size >= 2) {
         // room is full
@@ -47,12 +47,24 @@ io.on("connection", (socket) => {
       }
 
       // room is not full and we can join
-      // TODO: Need a check if room will be full, if it is, need to assign player 1 and 2 to each player (could just sort by connection ID) and start game
       // TODO: need to leave old room if applicable
-      socket.join(data.roomCode);
-      const newGameData = GameManager.createNewGame();
-      socket.nsp.to(data.roomCode).emit("new_game", newGameData); // send game start data to all players in the room
-      return;
+      if (users.size === 1) {
+        // get user already in room before adding new user
+        const [firstUser] = users;
+        socket.join(data.roomCode);
+
+        const newGameData = GameManager.createNewGame();
+
+        // send game data to players
+        // switch hands for player 2 so each player has their own hand
+        socket.to(data.roomCode).emit("new_game", newGameData);
+        socket.emit("new_game", {
+          ...newGameData,
+          currentPlayerHand: newGameData.opponentPlayerHand,
+          opponentPlayerHand: newGameData.currentPlayerHand,
+        });
+        return;
+      }
     } else {
       // room has not been created yet
       // TODO: need to leave old room if applicable

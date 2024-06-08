@@ -15,6 +15,7 @@ const GameBoard = (props: GameBoardProps) => {
   };
 
   const handleCurrentPlayerCardClick = (e: React.MouseEvent) => {
+    // TODO: send event to server with data on card that is clicked to make a move
     socket.emit("send_message", { message: "test", roomCode: "23" });
     const cardKey = e.currentTarget.getAttribute("data-key");
 
@@ -36,6 +37,7 @@ const GameBoard = (props: GameBoardProps) => {
             suit={card.suit}
             rank={card.rank}
             height={card.height}
+            isFaceUp={false}
           />
         ))}
       </div>
@@ -46,6 +48,7 @@ const GameBoard = (props: GameBoardProps) => {
           suit={props.gameData.trumpCard.suit}
           rank={props.gameData.trumpCard.rank}
           height={props.gameData.trumpCard.height}
+          isFaceUp={true}
         />
       </div>
       In Play
@@ -56,6 +59,7 @@ const GameBoard = (props: GameBoardProps) => {
             suit={card.suit}
             rank={card.rank}
             height={card.height}
+            isFaceUp={true}
           />
         ))}
       </div>
@@ -68,6 +72,7 @@ const GameBoard = (props: GameBoardProps) => {
             suit={card.suit}
             rank={card.rank}
             height={card.height}
+            isFaceUp={true}
           />
         ))}
       </div>
