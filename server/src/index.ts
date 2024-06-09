@@ -5,8 +5,8 @@ import cors from "cors";
 import {
   PlayerTurnRequest,
   PlayerTurnResponse,
-} from "@client/types/playerTurn";
-import { JoinRoomRequest, JoinRoomResponse } from "@client/types/joinRoom";
+} from "@client/types/PlayerTurn";
+import { JoinRoomRequest, JoinRoomResponse } from "@client/types/JoinRoom";
 import { GameManager } from "./GameManager";
 
 const app = express();

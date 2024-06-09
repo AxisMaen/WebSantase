@@ -1,8 +1,8 @@
 import "./App.css";
-import GameBoard from "./components/GameBoard";
+import GameBoard from "./components/GameBoard/GameBoard";
 import { useEffect, useState } from "react";
-import { JoinRoomResponse } from "./types/joinRoom";
-import { GameData } from "./types/gameData";
+import { JoinRoomResponse } from "./types/JoinRoom";
+import { GameData } from "./types/GameData";
 import { SocketContext, socket } from "./context/socket";
 
 const App = () => {
@@ -14,7 +14,7 @@ const App = () => {
   const [gameData, setGameData] = useState<GameData>({
     currentPlayerHand: [],
     opponentPlayerHand: [],
-    trumpCard: { key: "", rank: "", suit: "", height: "" },
+    trumpCard: { key: "", rank: "", suit: "" },
     cardsInPlay: [],
     deck: [],
   });

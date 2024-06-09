@@ -1,4 +1,4 @@
-import { Card, GameData } from "@client/types/gameData";
+import { Card, GameData } from "@client/types/GameData";
 
 export namespace GameManager {
   export function createNewGame(): GameData {
@@ -14,7 +14,6 @@ export namespace GameManager {
           key: rank + suit,
           suit: suit,
           rank: rank,
-          height: "150px",
         });
       }
     }

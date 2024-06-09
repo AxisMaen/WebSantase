@@ -2,7 +2,6 @@ export interface Card {
   key: string;
   rank: string;
   suit: string;
-  height: string;
 }
 
 export interface GameData {
