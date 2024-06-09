@@ -51,6 +51,13 @@ io.on("connection", (socket) => {
       if (users.size === 1) {
         // get user already in room before adding new user
         const [firstUser] = users;
+
+        // do not let the same user join a room twice
+        if (firstUser === socket.id) {
+          // TODO: we probably want some sort of callback here so the client can display a message
+          return;
+        }
+
         socket.join(data.roomCode);
 
         const newGameData = GameManager.createNewGame();
