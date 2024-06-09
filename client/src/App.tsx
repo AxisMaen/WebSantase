@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { JoinRoomResponse } from "./types/JoinRoom";
 import { GameData } from "./types/GameData";
 import { SocketContext, socket } from "./context/socket";
+import { PlayTurnResponse } from "./types/PlayTurn";
 
 const App = () => {
   const [roomCode, setRoomCode] = useState("");
@@ -46,6 +47,19 @@ const App = () => {
       setGameData(data);
       setIsGameInProgress(true);
     });
+
+    socket.on("receive_turn", (data: PlayTurnResponse) => {
+      // check if there was an error on the turn
+      // update the board with new game state
+      console.log("Setting new board: ", data);
+      if (data.error) {
+        console.log("INVALID TURN");
+        return;
+      }
+
+      console.log("Setting new board: ", data);
+      setGameData(data);
+    });
   }, []);
 
   return (
@@ -67,11 +81,7 @@ const App = () => {
         <button onClick={sendMesssage}>Send Message</button>
         <h1>Message:</h1>
         {receivedMessage}
-        <GameBoard
-          roomCode={roomCode}
-          gameData={gameData}
-          isGameInProgress={isGameInProgress}
-        />
+        <GameBoard gameData={gameData} isGameInProgress={isGameInProgress} />
       </div>
     </SocketContext.Provider>
   );

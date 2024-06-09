@@ -1,10 +1,10 @@
 import PlayingCard from "../PlayingCard/PlayingCard";
 import { socket } from "../../context/socket";
-import { GameData } from "../../types/GameData";
+import { Card, GameData } from "../../types/GameData";
 import { useState } from "react";
+import { PlayTurnRequest } from "../../types/PlayTurn";
 
 interface GameBoardProps {
-  roomCode: string;
   gameData: GameData;
   isGameInProgress: boolean;
 }
@@ -13,7 +13,11 @@ interface GameBoardProps {
 const CARDHEIGHT = "150px";
 
 const GameBoard = (props: GameBoardProps) => {
-  const [selectedCardKey, setSelectedCardKey] = useState<string>("");
+  const [selectedCard, setSelectedCard] = useState<Card>({
+    key: "",
+    suit: "",
+    rank: "",
+  });
 
   const handStyles = {
     display: "flex",
@@ -23,15 +27,25 @@ const GameBoard = (props: GameBoardProps) => {
   const handleCurrentPlayerCardClick = (e: React.MouseEvent) => {
     const cardKey = e.currentTarget.getAttribute("data-key");
 
-    if (cardKey) {
-      setSelectedCardKey(cardKey);
+    // verify the card is in the player's hand and set the selectedCard state
+    if (
+      cardKey &&
+      props.gameData.currentPlayerHand.map((card) => card.key).includes(cardKey)
+    ) {
+      const cardIndex = props.gameData.currentPlayerHand.findIndex(
+        (card) => cardKey === card.key
+      );
+
+      setSelectedCard(props.gameData.currentPlayerHand[cardIndex]);
     }
   };
 
   const handlePlayCard = (e: React.MouseEvent) => {
-    // TODO: send event to server with data on card that is clicked to make a move
-    socket.emit("send_message", { message: "test", roomCode: props.roomCode });
-    console.log("selected card: ", selectedCardKey);
+    const turnData: PlayTurnRequest = {
+      playedCard: selectedCard,
+      ...props.gameData,
+    };
+    socket.emit("play_turn", turnData);
   };
 
   if (!props.isGameInProgress) {
@@ -79,7 +93,7 @@ const GameBoard = (props: GameBoardProps) => {
       Player 1
       <div style={handStyles}>
         {props.gameData.currentPlayerHand.map((card) => {
-          const isSelectedCard = card.key === selectedCardKey;
+          const isSelectedCard = card.key === selectedCard.key;
           return (
             <PlayingCard
               key={card.key}

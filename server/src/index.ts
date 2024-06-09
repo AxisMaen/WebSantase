@@ -2,11 +2,9 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import {
-  PlayerTurnRequest,
-  PlayerTurnResponse,
-} from "@client/types/PlayerTurn";
+import { PlayTurnRequest, PlayTurnResponse } from "@client/types/PlayTurn";
 import { JoinRoomRequest, JoinRoomResponse } from "@client/types/JoinRoom";
+import { ConnectedClient } from "@client/types/ConnectedClient";
 import { GameManager } from "./GameManager";
 
 const app = express();
@@ -21,8 +19,11 @@ const io = new Server(server, {
   },
 });
 
+const clients: ConnectedClient[] = [];
+
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
+  clients.push({ id: socket.id, roomCode: "", isTurn: false });
 
   socket.on("send_message", (data) => {
     socket.to(data.roomCode).emit("receive_message", data);
@@ -47,7 +48,7 @@ io.on("connection", (socket) => {
       }
 
       // room is not full and we can join
-      // TODO: need to leave old room if applicable
+      // TODO: need to leave old room if applicable (remember to change socket.data.roomCode)
       if (users.size === 1) {
         // get user already in room before adding new user
         const [firstUser] = users;
@@ -59,6 +60,7 @@ io.on("connection", (socket) => {
         }
 
         socket.join(data.roomCode);
+        socket.data.roomCode = data.roomCode;
 
         const newGameData = GameManager.createNewGame();
 
@@ -76,39 +78,38 @@ io.on("connection", (socket) => {
       // room has not been created yet
       // TODO: need to leave old room if applicable
       socket.join(data.roomCode);
+      socket.data.roomCode = data.roomCode;
+
       response = { message: `Joined room ${data.roomCode}` };
       callback(response);
       return;
     }
   });
 
-  socket.on("player_turn", (data: PlayerTurnRequest): PlayerTurnResponse => {
-    // we need to verify that the turn is a valid move
-    // we could try and verify that the card is in the player's hand (prevent cheating) but idk how to do this
+  socket.on("play_turn", (data: PlayTurnRequest) => {
+    try {
+      const newGameData = GameManager.doTurn(data);
 
-    // move card out of current players hand and into in play
-    const cardIndex = data.currentPlayerHand.findIndex(
-      (card) => data.card.key === card.key
-    );
-
-    const newCurrentPlayerHand = [
-      ...data.currentPlayerHand.slice(0, cardIndex),
-      ...data.currentPlayerHand.slice(
-        cardIndex + 1,
-        data.currentPlayerHand.length
-      ),
-    ];
-
-    const newCardsInPlay = data.cardsInPlay.concat(data.card);
-
-    return {
-      isValidMove: true,
-      deck: data.deck,
-      trumpCard: data.trumpCard,
-      cardsInPlay: newCardsInPlay,
-      playerOneHand: newCurrentPlayerHand,
-      playerTwoHand: data.opposingPlayerHand,
-    };
+      // send response to the correct players
+      socket.emit("receive_turn", newGameData as PlayTurnResponse);
+      socket.to(socket.data.roomCode).emit("receive_turn", {
+        ...newGameData,
+        currentPlayerHand: newGameData.opponentPlayerHand,
+        opponentPlayerHand: newGameData.currentPlayerHand,
+      } as PlayTurnResponse);
+    } catch {
+      // invalid turn, do not change game state
+      const response = {
+        error: "Invalid turn",
+        ...data,
+      };
+      socket.emit("receive_turn", response as PlayTurnResponse);
+      socket.to(socket.data.roomCode).emit("receive_turn", {
+        ...response,
+        currentPlayerHand: data.opponentPlayerHand,
+        opponentPlayerHand: data.currentPlayerHand,
+      } as PlayTurnResponse);
+    }
   });
 });
 
