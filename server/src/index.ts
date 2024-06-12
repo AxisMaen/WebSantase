@@ -4,7 +4,6 @@ import { Server } from "socket.io";
 import cors from "cors";
 import { PlayTurnRequest, PlayTurnResponse } from "@client/types/PlayTurn";
 import { JoinRoomRequest, JoinRoomResponse } from "@client/types/JoinRoom";
-import { ConnectedClient } from "@client/types/ConnectedClient";
 import { GameManager } from "./GameManager";
 
 const app = express();
@@ -19,11 +18,8 @@ const io = new Server(server, {
   },
 });
 
-const clients: ConnectedClient[] = [];
-
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
-  clients.push({ id: socket.id, roomCode: "", isTurn: false });
 
   socket.on("send_message", (data) => {
     socket.to(data.roomCode).emit("receive_message", data);
