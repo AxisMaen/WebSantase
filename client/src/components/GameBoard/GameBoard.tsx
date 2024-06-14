@@ -1,11 +1,11 @@
 import PlayingCard from "../PlayingCard/PlayingCard";
 import { socket } from "../../context/socket";
-import { Card, GameData } from "../../types/GameData";
+import { Card, ClientGameData } from "../../types/GameData";
 import { useState } from "react";
 import { PlayTurnRequest } from "../../types/PlayTurn";
 
 interface GameBoardProps {
-  gameData: GameData;
+  gameData: ClientGameData;
   isGameInProgress: boolean;
 }
 
@@ -28,6 +28,7 @@ const GameBoard = (props: GameBoardProps) => {
     const cardKey = e.currentTarget.getAttribute("data-key");
 
     // verify the card is in the player's hand and set the selectedCard state
+    // TODO: if the clicked card is already selected, we should deselect it
     if (
       cardKey &&
       props.gameData.currentPlayerHand.map((card) => card.key).includes(cardKey)

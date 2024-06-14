@@ -2,17 +2,15 @@ import "./App.css";
 import GameBoard from "./components/GameBoard/GameBoard";
 import { useEffect, useState } from "react";
 import { JoinRoomResponse } from "./types/JoinRoom";
-import { GameData } from "./types/GameData";
+import { ClientGameData } from "./types/GameData";
 import { SocketContext, socket } from "./context/socket";
 import { PlayTurnResponse } from "./types/PlayTurn";
 
 const App = () => {
   const [roomCode, setRoomCode] = useState("");
-  const [message, setMessage] = useState("");
-  const [receivedMessage, setReceivedMessage] = useState("");
-
   const [isGameInProgress, setIsGameInProgress] = useState<boolean>(false);
-  const [gameData, setGameData] = useState<GameData>({
+  const [gameData, setGameData] = useState<ClientGameData>({
+    isCurrentPlayerTurn: false,
     currentPlayerHand: [],
     opponentPlayerHand: [],
     trumpCard: { key: "", rank: "", suit: "" },
@@ -20,11 +18,8 @@ const App = () => {
     deck: [],
   });
 
-  const sendMesssage = () => {
-    socket.emit("send_message", { message: message, roomCode: roomCode });
-  };
-
   const joinRoom = () => {
+    // TODO: we should make it impossible to join a new room once a game has started
     if (roomCode) {
       socket.emit(
         "join_room",
@@ -38,11 +33,7 @@ const App = () => {
 
   // receive messages emitted by socket.io
   useEffect(() => {
-    socket.on("receive_message", (data) => {
-      setReceivedMessage(data.message);
-    });
-
-    socket.on("new_game", (data: GameData) => {
+    socket.on("new_game", (data: ClientGameData) => {
       console.log("New game starting: ", data);
       setGameData(data);
       setIsGameInProgress(true);
@@ -51,9 +42,8 @@ const App = () => {
     socket.on("receive_turn", (data: PlayTurnResponse) => {
       // check if there was an error on the turn
       // update the board with new game state
-      console.log("Setting new board: ", data);
       if (data.error) {
-        console.log("INVALID TURN");
+        console.error("Turn error: ", data.error);
         return;
       }
 
@@ -72,15 +62,8 @@ const App = () => {
           }}
         ></input>
         <button onClick={joinRoom}>Join Room</button>
-        <input
-          placeholder="Message..."
-          onChange={(event) => {
-            setMessage(event.target.value);
-          }}
-        ></input>
-        <button onClick={sendMesssage}>Send Message</button>
-        <h1>Message:</h1>
-        {receivedMessage}
+        <h1>Is My Turn?</h1>
+        {gameData.isCurrentPlayerTurn ? "Yes" : "No"}
         <GameBoard gameData={gameData} isGameInProgress={isGameInProgress} />
       </div>
     </SocketContext.Provider>

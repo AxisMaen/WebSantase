@@ -1,10 +1,10 @@
-import { GameData } from "./GameData";
+import { ClientGameData } from "./GameData";
 
-export interface PlayTurnRequest extends GameData {
+export interface PlayTurnRequest extends ClientGameData {
   playedCard: Card;
 }
 
-export interface PlayTurnResponse extends GameData {
+export interface PlayTurnResponse extends ClientGameData {
   error?: string;
 }
 

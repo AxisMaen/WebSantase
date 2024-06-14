@@ -1,8 +1,9 @@
-import { Card, GameData } from "@client/types/GameData";
+import { Card, ClientGameData } from "@client/types/GameData";
 import { PlayTurnRequest } from "@client/types/PlayTurn";
 
 export module GameManager {
-  export function createNewGame(): GameData {
+  // returns client game data
+  export function createNewGame(): ClientGameData {
     const ranks = ["9", "T", "J", "Q", "K", "A"];
     const suits = ["h", "d", "c", "s"];
 
@@ -20,6 +21,7 @@ export module GameManager {
     }
 
     return {
+      isCurrentPlayerTurn: true,
       currentPlayerHand: initialDeck.slice(0, 6),
       opponentPlayerHand: initialDeck.slice(6, 12),
       trumpCard: initialDeck[12],
@@ -28,11 +30,13 @@ export module GameManager {
     };
   }
 
-  // takes in turn data and outputs the game state after the turn is made
+  // takes in turn data and outputs the client game data for the player who made the turn
   // throws an error if the turn is not valid
-  export function doTurn(data: PlayTurnRequest): GameData {
+  export function doTurn(data: PlayTurnRequest): ClientGameData {
+    /*
     throw Error;
     // TODO: verify that the turn is valid, throw error if not
+    */
 
     // DEMO: move card out of current player's hand and into in play
     const cardIndex = data.currentPlayerHand.findIndex(
@@ -50,6 +54,7 @@ export module GameManager {
     const newCardsInPlay = data.cardsInPlay.concat(data.playedCard);
 
     return {
+      isCurrentPlayerTurn: false,
       currentPlayerHand: newCurrentPlayerHand,
       opponentPlayerHand: data.opponentPlayerHand,
       trumpCard: data.trumpCard,
