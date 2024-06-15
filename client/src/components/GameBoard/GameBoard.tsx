@@ -28,7 +28,6 @@ const GameBoard = (props: GameBoardProps) => {
     const cardKey = e.currentTarget.getAttribute("data-key");
 
     // verify the card is in the player's hand and set the selectedCard state
-    // TODO: if the clicked card is already selected, we should deselect it
     if (
       cardKey &&
       props.gameData.currentPlayerHand.map((card) => card.key).includes(cardKey)
@@ -37,7 +36,18 @@ const GameBoard = (props: GameBoardProps) => {
         (card) => cardKey === card.key
       );
 
-      setSelectedCard(props.gameData.currentPlayerHand[cardIndex]);
+      const clickedCard = props.gameData.currentPlayerHand[cardIndex];
+
+      // deselect the card if it's already selected
+      if (clickedCard === selectedCard) {
+        setSelectedCard({
+          key: "",
+          suit: "",
+          rank: "",
+        });
+      } else {
+        setSelectedCard(clickedCard);
+      }
     }
   };
 
