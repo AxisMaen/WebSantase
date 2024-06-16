@@ -2,7 +2,7 @@ export interface JoinRoomRequest {
   roomCode: string;
 }
 
-export interface JoinRoomResponse {
+export interface RoomEventResponse {
   error?: boolean;
   message: string;
 }

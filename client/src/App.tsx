@@ -1,7 +1,7 @@
 import "./App.css";
 import GameBoard from "./components/GameBoard/GameBoard";
 import { useEffect, useState } from "react";
-import { JoinRoomResponse } from "./types/JoinRoom";
+import { RoomEventResponse } from "./types/JoinRoom";
 import { ClientGameData } from "./types/GameData";
 import { SocketContext, socket } from "./context/socket";
 import { PlayTurnResponse } from "./types/PlayTurn";
@@ -17,6 +17,7 @@ const App = () => {
     cardsInPlay: [],
     deck: [],
   });
+  const [statusMessage, setStatusMessage] = useState<string>("");
 
   const joinRoom = () => {
     // TODO: we should make it impossible to join a new room once a game has started
@@ -24,7 +25,7 @@ const App = () => {
       socket.emit(
         "join_room",
         { roomCode: roomCode },
-        (response: JoinRoomResponse) => {
+        (response: RoomEventResponse) => {
           console.log("Join room response: ", response);
         }
       );
@@ -50,6 +51,19 @@ const App = () => {
       console.log("Setting new board: ", data);
       setGameData(data);
     });
+
+    socket.on("user_disconnected", (data) => {
+      setStatusMessage("You have disconnected from the server.");
+      setIsGameInProgress(false);
+    });
+
+    socket.on("opponent_disconnected", (data) => {
+      socket.emit("leave_room", {}, (response: RoomEventResponse) => {
+        console.log("Leave room response: ", response);
+      });
+      setStatusMessage("Opponent has disconnected from the server.");
+      setIsGameInProgress(false);
+    });
   }, []);
 
   return (
@@ -64,6 +78,8 @@ const App = () => {
         <button onClick={joinRoom}>Join Room</button>
         <h1>Is My Turn?</h1>
         {gameData.isCurrentPlayerTurn ? "Yes" : "No"}
+        <h1>Status Message:</h1>
+        {statusMessage}
         <GameBoard gameData={gameData} isGameInProgress={isGameInProgress} />
       </div>
     </SocketContext.Provider>

@@ -3,7 +3,7 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import { PlayTurnRequest, PlayTurnResponse } from "@client/types/PlayTurn";
-import { JoinRoomRequest, JoinRoomResponse } from "@client/types/JoinRoom";
+import { JoinRoomRequest, RoomEventResponse } from "@client/types/JoinRoom";
 import { GameManager } from "./GameManager";
 import { ClientGameData, GameState } from "@client/types/GameData";
 
@@ -21,7 +21,7 @@ const io = new Server(server, {
 
 // key = room code
 // Holds the game state for every active game.
-// If both players in a game disconnect, remove the game from the map.
+// If a player in a game disconnects, remove the game from the map.
 // Eventually, the goal is that when a client reconnects, it can recreate the game state from this.
 const activeGames = new Map<string, GameState>();
 
@@ -29,17 +29,34 @@ io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
 
   socket.on("disconnecting", (reason) => {
-    // TODO: using the room code and clientId, set the player to disconnected in the map
-    // if both players in the active game have disconnected, remove key from map
-    // for now, if even one player disconnects, remove the key from the map and send a message to everyone in the room that the game has ended
+    // TODO: using the room code and clientId, set the player to disconnected in the map.
+    // If both players in the active game have disconnected, remove key from map
+    // This will allow players to reconnect and resume the game if possible.
+
+    // remove active game and emit event to players if needed
+    const gameState = activeGames.get(socket.data.roomCode);
+    if (gameState) {
+      const otherPlayer =
+        gameState?.player1Id === socket.id
+          ? gameState.player2Id
+          : gameState.player1Id;
+
+      activeGames.delete(socket.data.roomCode);
+      socket.emit("user_disconnected", {});
+      socket.to(otherPlayer).emit("opponent_disconnected", {});
+    }
   });
 
-  socket.on("send_message", (data) => {
-    socket.to(data.roomCode).emit("receive_message", data);
+  socket.on("leave_room", (data, callback) => {
+    const roomCode = socket.data.roomCode;
+    socket.leave(roomCode);
+    delete socket.data.roomCode;
+    const response: RoomEventResponse = { message: `Left room ${roomCode}}` };
+    callback(response);
   });
 
   socket.on("join_room", (data: JoinRoomRequest, callback) => {
-    let response: JoinRoomResponse;
+    let response: RoomEventResponse;
 
     const users = io.sockets.adapter.rooms.get(data.roomCode);
 
@@ -47,7 +64,7 @@ io.on("connection", (socket) => {
     if (users) {
       if (users.size >= 2) {
         // room is full
-        const response = {
+        response = {
           error: true,
           message: "Room is full",
         };
